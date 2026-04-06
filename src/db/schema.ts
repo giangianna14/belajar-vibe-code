@@ -7,3 +7,10 @@ export const users = mysqlTable("users", {
   password: varchar({ length: 255 }).notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
+
+export const sessions = mysqlTable("sessions", {
+  id: int().primaryKey().autoincrement(),
+  token: varchar({ length: 255 }).notNull(),
+  userId: int().notNull().references(() => users.id),
+  createdAt: timestamp().notNull().defaultNow(),
+});
