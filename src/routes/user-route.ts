@@ -1,6 +1,17 @@
 import { Elysia } from "elysia";
 import { registerUser, loginUser, getCurrentUser, logoutUser } from "../services/user-service";
 
+/**
+ * Helper function to extract and validate Bearer token from Authorization header
+ * Returns the token string or null if invalid
+ */
+function extractBearerToken(authorization: string | undefined): string | null {
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return null;
+  }
+  return authorization.slice(7).trim();
+}
+
 export const userRoute = new Elysia()
   .post("/api/users", async ({ body }) => {
     const { name, email, password } = body as {
@@ -34,13 +45,11 @@ export const userRoute = new Elysia()
     }
   })
   .get("/api/users/current", async ({ headers }) => {
-    const authorization = headers["authorization"];
+    const token = extractBearerToken(headers["authorization"]);
 
-    if (!authorization || !authorization.startsWith("Bearer ")) {
+    if (!token) {
       return { error: "Unauthorized" };
     }
-
-    const token = authorization.slice(7);
 
     try {
       const user = await getCurrentUser(token);
@@ -52,13 +61,11 @@ export const userRoute = new Elysia()
     }
   })
   .delete("/api/users/logout", async ({ headers }) => {
-    const authorization = headers["authorization"];
+    const token = extractBearerToken(headers["authorization"]);
 
-    if (!authorization || !authorization.startsWith("Bearer ")) {
+    if (!token) {
       return { error: "Unauthorized" };
     }
-
-    const token = authorization.slice(7);
 
     try {
       const result = await logoutUser(token);
