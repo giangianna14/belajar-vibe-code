@@ -55,3 +55,41 @@ export async function loginUser(
 
   return token;
 }
+
+export async function getCurrentUser(token: string): Promise<{
+  id: number;
+  name: string;
+  email: string;
+  createdAt: Date;
+}> {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const sessionResult = await db
+    .select()
+    .from(sessions)
+    .where(eq(sessions.token, token));
+
+  if (sessionResult.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  const session = sessionResult[0]!;
+
+  const userResult = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, session.userId));
+
+  if (userResult.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  return userResult[0]!;
+}
