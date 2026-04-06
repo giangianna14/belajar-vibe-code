@@ -99,16 +99,12 @@ export async function logoutUser(token: string): Promise<string> {
     throw new Error("Unauthorized");
   }
 
-  const sessionResult = await db
-    .select()
-    .from(sessions)
-    .where(eq(sessions.token, token));
+  const result = await db.delete(sessions).where(eq(sessions.token, token));
 
-  if (sessionResult.length === 0) {
+  // MySQL2 returns ResultSetHeader with affectedRows
+  if ((result as any).affectedRows === 0) {
     throw new Error("Unauthorized");
   }
-
-  await db.delete(sessions).where(eq(sessions.token, token));
 
   return "OK";
 }
