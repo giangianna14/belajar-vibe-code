@@ -1,8 +1,10 @@
 import { Elysia } from "elysia";
 import { db } from "./db/config";
 import { users } from "./db/schema";
+import { userRoute } from "./routes/user-route";
 
 const app = new Elysia()
+  .use(userRoute)
   .get("/", () => ({
     message: "Hello World! 🚀 Backend API is running",
     status: "ok",
