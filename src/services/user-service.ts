@@ -93,3 +93,22 @@ export async function getCurrentUser(token: string): Promise<{
 
   return userResult[0]!;
 }
+
+export async function logoutUser(token: string): Promise<string> {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const sessionResult = await db
+    .select()
+    .from(sessions)
+    .where(eq(sessions.token, token));
+
+  if (sessionResult.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  await db.delete(sessions).where(eq(sessions.token, token));
+
+  return "OK";
+}
